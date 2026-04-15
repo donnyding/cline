@@ -99,6 +99,7 @@ export async function runAcpMode(options: AcpModeOptions = {}): Promise<void> {
 		agent = new AcpAgent(conn, {
 			debug: Boolean(options.verbose),
 			hooksDir: options.hooksDir,
+			clineDir: options.config,
 		})
 		return agent
 	}, stream)

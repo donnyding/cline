@@ -83,6 +83,8 @@ export interface AcpAgentOptions {
 	debug?: boolean
 	/** Additional runtime hooks directory */
 	hooksDir?: string
+	/** Cline Config Directory (defaults to ~/.cline) */
+	clineDir?: string
 }
 
 // ============================================================
