@@ -89,6 +89,7 @@ export interface CliContextResult {
 	DATA_DIR: string
 	EXTENSION_DIR: string
 	WORKSPACE_STORAGE_DIR: string
+	LOG_DIR: string
 }
 
 /**
@@ -153,11 +154,14 @@ export function initializeCliContext(config: CliContextConfig = {}): CliContextR
 		environmentVariableCollection: new EnvironmentVariableCollection() as any,
 	}
 
+	const LOG_DIR = process.env.CLINE_LOG_DIR ?? path.join(DATA_DIR, "logs")
+
 	return {
 		extensionContext,
 		storageContext,
 		DATA_DIR,
 		EXTENSION_DIR,
 		WORKSPACE_STORAGE_DIR,
+		LOG_DIR,
 	}
 }

@@ -4,6 +4,7 @@
 
 import type { ChildProcess } from "node:child_process"
 import { exit } from "node:process"
+import path from "node:path"
 import type { ApiProvider } from "@shared/api"
 import { Command } from "commander"
 import { render } from "ink"
@@ -61,7 +62,7 @@ import { getValidCliProviders, isValidCliProvider } from "./utils/providers"
 import { findMostRecentTaskForWorkspace } from "./utils/task-history"
 import { autoUpdateOnStartup, checkForUpdates } from "./utils/update"
 import { initializeCliContext } from "./vscode-context"
-import { CLI_LOG_FILE, shutdownEvent, window } from "./vscode-shim"
+import { CLI_LOG_FILE, setCliLogFile, shutdownEvent, window } from "./vscode-shim"
 
 // CLI-only behavior: suppress console output unless verbose mode is enabled.
 // Kept explicit here so importing the library bundle does not mutate global console methods.
@@ -628,10 +629,13 @@ interface InitOptions {
 async function initializeCli(options: InitOptions): Promise<CliContext> {
 	const workspacePath = options.cwd || process.cwd()
 	setRuntimeHooksDir(options.hooksDir)
-	const { extensionContext, storageContext, DATA_DIR, EXTENSION_DIR } = initializeCliContext({
+	const { extensionContext, storageContext, DATA_DIR, EXTENSION_DIR, LOG_DIR } = initializeCliContext({
 		clineDir: options.config,
 		workspaceDir: workspacePath,
 	})
+
+	// Set log file path using the DATA_DIR-aware LOG_DIR before any logger is created
+	setCliLogFile(path.join(LOG_DIR, "cline-cli.1.log"))
 
 	// Set up output channel and Logger early so ClineEndpoint.initialize logs are captured
 	const outputChannel = window.createOutputChannel("Cline CLI")
@@ -653,7 +657,7 @@ async function initializeCli(options: InitOptions): Promise<CliContext> {
 	}
 
 	outputChannel.appendLine(
-		`Cline CLI initialized. Data dir: ${DATA_DIR}, Extension dir: ${EXTENSION_DIR}, Log dir: ${CLINE_CLI_DIR.log}`,
+		`Cline CLI initialized. Data dir: ${DATA_DIR}, Extension dir: ${EXTENSION_DIR}, Log dir: ${LOG_DIR}`,
 	)
 
 	HostProvider.initialize(

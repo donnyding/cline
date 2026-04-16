@@ -4,15 +4,19 @@
  */
 
 import { existsSync, readFileSync } from "node:fs"
-import path from "node:path"
 import pino, { type Logger } from "pino"
 import { printError, printInfo, printWarning } from "./utils/display"
-import { CLINE_CLI_DIR } from "./utils/path"
-
 export { URI } from "vscode-uri"
 export { ClineFileStorage } from "@/shared/storage"
 
-export const CLI_LOG_FILE = path.join(CLINE_CLI_DIR.log, "cline-cli.1.log")
+// CLI log file path — set dynamically via setLogFilePath after initializeCliContext resolves the correct DATA_DIR
+let cliLogFile = "cline-cli.1.log"
+
+export function setCliLogFile(logFilePath: string) {
+	cliLogFile = logFilePath
+}
+
+export { cliLogFile as CLI_LOG_FILE }
 
 /**
  * Safely read and parse a JSON file, returning a default value on failure
@@ -109,7 +113,7 @@ function getOutputChannelLogger(channelName: string): Logger {
 			target: "pino-roll",
 			options: {
 				name: channelName,
-				file: CLI_LOG_FILE.replace(".1", ""),
+				file: cliLogFile.replace(".1", ""),
 				mkdir: true,
 				frequency: "daily",
 				limit: { count: 5 },
